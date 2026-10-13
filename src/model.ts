@@ -1,3 +1,4 @@
+import { directorSchema } from "./director/settings";
 import {
   appearances,
   propKinds,
@@ -108,6 +109,7 @@ export const projectSchema = z
     id,
     name,
     updatedAt: z.number().finite(),
+    director: directorSchema.optional(),
     scene: sceneSchema,
     frames: z.array(frameSchema).max(100),
     animation: z.object({

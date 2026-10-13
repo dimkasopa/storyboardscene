@@ -1,3 +1,4 @@
+import { DirectorPanel } from "./components/DirectorPanel";
 import { EditorDisplay, defaultVisibility } from "./components/EditorDisplay";
 import { CameraPanel } from "./components/CameraPanel";
 import { ProjectHeader } from "./components/ProjectHeader";
@@ -66,7 +67,9 @@ export default function App() {
     [previewing, setPreviewing] = useState(false),
     [playing, setPlaying] = useState<"shots" | "motion" | null>(null),
     [shotIndex, setShotIndex] = useState(0);
-  const [modal, setModal] = useState<"projects" | "help" | null>(null),
+  const [modal, setModal] = useState<"projects" | "help" | "director" | null>(
+      null,
+    ),
     [projects, setProjects] = useState<Project[]>([]),
     [busy, setBusy] = useState(""),
     [message, setMessage] = useState("");
@@ -510,6 +513,9 @@ export default function App() {
           <strong>{project.name}</strong>
         </div>
         <div className="button-row">
+          <button disabled={disabled} onClick={() => setModal("director")}>
+            <Settings2 size={15} /> Пульт режиссёра
+          </button>
           <button
             disabled={!store.canUndo || disabled}
             onClick={store.undo}
@@ -817,8 +823,20 @@ export default function App() {
           </div>
         </div>
       )}
+      {modal === "director" && (
+        <DirectorPanel
+          project={project}
+          onChange={(settings) =>
+            commit((d) => {
+              d.director = settings;
+            })
+          }
+          onClose={() => setModal(null)}
+          notify={notify}
+        />
+      )}
       <ProjectDialogs
-        modal={modal}
+        modal={modal === "director" ? null : modal}
         projects={projects}
         onClose={() => setModal(null)}
         onOpen={(p) =>
