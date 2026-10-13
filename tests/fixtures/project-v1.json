@@ -1,0 +1,1027 @@
+{
+  "version": 1,
+  "id": "de04b303-8de4-4887-b8e2-f294db479c27",
+  "name": "Совместимость Director Studio v1",
+  "updatedAt": 1791840000000,
+  "scene": {
+    "objects": [
+      {
+        "id": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+        "name": "Алексей",
+        "kind": "person",
+        "position": [
+          -1,
+          0,
+          0
+        ],
+        "rotation": 55,
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "color": "#c89b72",
+        "height": 1.75,
+        "pose": "stand",
+        "arms": "down",
+        "head": 0
+      },
+      {
+        "id": "d330549d-364d-4b0b-93d9-88945c179fd9",
+        "name": "Мария",
+        "kind": "person",
+        "position": [
+          1.15,
+          0,
+          0.2
+        ],
+        "rotation": -65,
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "color": "#729b9a",
+        "height": 1.68,
+        "pose": "stand",
+        "arms": "front",
+        "head": 0
+      },
+      {
+        "id": "48ced0a5-8db6-44ed-865e-13a1ff74e262",
+        "name": "Стол",
+        "kind": "table",
+        "position": [
+          0,
+          0,
+          -1
+        ],
+        "rotation": 0,
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "color": "#b5a58b",
+        "height": 1.75,
+        "pose": "stand",
+        "arms": "down",
+        "head": 0
+      },
+      {
+        "id": "c8b07c0b-7b9f-49b5-b88f-a534bb27a573",
+        "name": "Стул",
+        "kind": "chair",
+        "position": [
+          0,
+          0,
+          -2
+        ],
+        "rotation": 0,
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "color": "#879a95",
+        "height": 1.75,
+        "pose": "stand",
+        "arms": "down",
+        "head": 0
+      },
+      {
+        "id": "f7ffd831-2b78-498d-aa5d-ae61823f60d0",
+        "name": "Стена",
+        "kind": "wall",
+        "position": [
+          0,
+          0,
+          -3
+        ],
+        "rotation": 0,
+        "size": [
+          8,
+          3,
+          0.12
+        ],
+        "color": "#b7c0bd",
+        "height": 1.75,
+        "pose": "stand",
+        "arms": "down",
+        "head": 0
+      },
+      {
+        "id": "ecb11432-0063-4986-9308-cfbb6f865e08",
+        "name": "Дверь",
+        "kind": "door",
+        "position": [
+          2.6,
+          0,
+          -2.88
+        ],
+        "rotation": 0,
+        "size": [
+          1,
+          1,
+          1
+        ],
+        "color": "#879a95",
+        "height": 1.75,
+        "pose": "stand",
+        "arms": "down",
+        "head": 0
+      }
+    ],
+    "cameras": [
+      {
+        "id": "47311ad8-92ec-4ea4-a8a3-2eb3bb0eff60",
+        "name": "Общий",
+        "position": [
+          1.075,
+          1.8575,
+          6.559282288168918
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "focal": 40,
+        "format": "16:9",
+        "aim": "point",
+        "targetId": null,
+        "target": [
+          0.07499999999999996,
+          0.8574999999999999,
+          0.1
+        ]
+      },
+      {
+        "id": "390e46b6-03a4-4d4c-9fd4-bfaaa9f31cae",
+        "name": "Средний",
+        "position": [
+          0.9659649062935802,
+          1.575,
+          1.3765834472425105
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "focal": 40,
+        "format": "16:9",
+        "aim": "person",
+        "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+        "target": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "id": "2ddbaac7-0cd6-47e5-a6d6-d9ed48c819b5",
+        "name": "Реакция",
+        "position": [
+          -0.8511275937769227,
+          1.512,
+          1.1331411219234642
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "focal": 75,
+        "format": "16:9",
+        "aim": "person",
+        "targetId": "d330549d-364d-4b0b-93d9-88945c179fd9",
+        "target": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "id": "f501c2e7-a0ce-41c5-9afe-5d10d03ba6f4",
+        "name": "Через плечо",
+        "position": [
+          1.8296239695201904,
+          1.562,
+          -0.088290235793062
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "focal": 35,
+        "format": "16:9",
+        "aim": "person",
+        "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+        "target": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "id": "934142b8-4da3-419c-a95a-fd9585114be7",
+        "name": "Снизу",
+        "position": [
+          2.686184199300463,
+          0.18,
+          2.581093963579707
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ],
+        "focal": 40,
+        "format": "16:9",
+        "aim": "person",
+        "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+        "target": [
+          0,
+          1,
+          0
+        ]
+      }
+    ],
+    "activeCameraId": "47311ad8-92ec-4ea4-a8a3-2eb3bb0eff60"
+  },
+  "frames": [
+    {
+      "id": "5eae9ce1-0331-4b32-9e5e-94d7473ea969",
+      "name": "Начало разговора",
+      "duration": 3,
+      "notes": "Обычный рабочий день.",
+      "thumbnail": "",
+      "scene": {
+        "objects": [
+          {
+            "id": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "name": "Алексей",
+            "kind": "person",
+            "position": [
+              -1,
+              0,
+              0
+            ],
+            "rotation": 55,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#c89b72",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "d330549d-364d-4b0b-93d9-88945c179fd9",
+            "name": "Мария",
+            "kind": "person",
+            "position": [
+              1.15,
+              0,
+              0.2
+            ],
+            "rotation": -65,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#729b9a",
+            "height": 1.68,
+            "pose": "stand",
+            "arms": "front",
+            "head": 0
+          },
+          {
+            "id": "48ced0a5-8db6-44ed-865e-13a1ff74e262",
+            "name": "Стол",
+            "kind": "table",
+            "position": [
+              0,
+              0,
+              -1
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#b5a58b",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "c8b07c0b-7b9f-49b5-b88f-a534bb27a573",
+            "name": "Стул",
+            "kind": "chair",
+            "position": [
+              0,
+              0,
+              -2
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#879a95",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "f7ffd831-2b78-498d-aa5d-ae61823f60d0",
+            "name": "Стена",
+            "kind": "wall",
+            "position": [
+              0,
+              0,
+              -3
+            ],
+            "rotation": 0,
+            "size": [
+              8,
+              3,
+              0.12
+            ],
+            "color": "#b7c0bd",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "ecb11432-0063-4986-9308-cfbb6f865e08",
+            "name": "Дверь",
+            "kind": "door",
+            "position": [
+              2.6,
+              0,
+              -2.88
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#879a95",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          }
+        ],
+        "cameras": [
+          {
+            "id": "47311ad8-92ec-4ea4-a8a3-2eb3bb0eff60",
+            "name": "Общий",
+            "position": [
+              1.075,
+              1.8575,
+              6.559282288168918
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "point",
+            "targetId": null,
+            "target": [
+              0.07499999999999996,
+              0.8574999999999999,
+              0.1
+            ]
+          },
+          {
+            "id": "390e46b6-03a4-4d4c-9fd4-bfaaa9f31cae",
+            "name": "Средний",
+            "position": [
+              0.9659649062935802,
+              1.575,
+              1.3765834472425105
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "2ddbaac7-0cd6-47e5-a6d6-d9ed48c819b5",
+            "name": "Реакция",
+            "position": [
+              -0.8511275937769227,
+              1.512,
+              1.1331411219234642
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 75,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "d330549d-364d-4b0b-93d9-88945c179fd9",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "f501c2e7-a0ce-41c5-9afe-5d10d03ba6f4",
+            "name": "Через плечо",
+            "position": [
+              1.8296239695201904,
+              1.562,
+              -0.088290235793062
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 35,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "934142b8-4da3-419c-a95a-fd9585114be7",
+            "name": "Снизу",
+            "position": [
+              2.686184199300463,
+              0.18,
+              2.581093963579707
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "activeCameraId": "47311ad8-92ec-4ea4-a8a3-2eb3bb0eff60"
+      }
+    },
+    {
+      "id": "bbc24bb6-6423-4430-9336-84ee7a6bbedc",
+      "name": "Важный вопрос",
+      "duration": 3,
+      "notes": "«А кто согласовал этот план?»",
+      "thumbnail": "",
+      "scene": {
+        "objects": [
+          {
+            "id": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "name": "Алексей",
+            "kind": "person",
+            "position": [
+              -1,
+              0,
+              0
+            ],
+            "rotation": 55,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#c89b72",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "d330549d-364d-4b0b-93d9-88945c179fd9",
+            "name": "Мария",
+            "kind": "person",
+            "position": [
+              1.15,
+              0,
+              0.2
+            ],
+            "rotation": -65,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#729b9a",
+            "height": 1.68,
+            "pose": "stand",
+            "arms": "front",
+            "head": 0
+          },
+          {
+            "id": "48ced0a5-8db6-44ed-865e-13a1ff74e262",
+            "name": "Стол",
+            "kind": "table",
+            "position": [
+              0,
+              0,
+              -1
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#b5a58b",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "c8b07c0b-7b9f-49b5-b88f-a534bb27a573",
+            "name": "Стул",
+            "kind": "chair",
+            "position": [
+              0,
+              0,
+              -2
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#879a95",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "f7ffd831-2b78-498d-aa5d-ae61823f60d0",
+            "name": "Стена",
+            "kind": "wall",
+            "position": [
+              0,
+              0,
+              -3
+            ],
+            "rotation": 0,
+            "size": [
+              8,
+              3,
+              0.12
+            ],
+            "color": "#b7c0bd",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "ecb11432-0063-4986-9308-cfbb6f865e08",
+            "name": "Дверь",
+            "kind": "door",
+            "position": [
+              2.6,
+              0,
+              -2.88
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#879a95",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          }
+        ],
+        "cameras": [
+          {
+            "id": "47311ad8-92ec-4ea4-a8a3-2eb3bb0eff60",
+            "name": "Общий",
+            "position": [
+              1.075,
+              1.8575,
+              6.559282288168918
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "point",
+            "targetId": null,
+            "target": [
+              0.07499999999999996,
+              0.8574999999999999,
+              0.1
+            ]
+          },
+          {
+            "id": "390e46b6-03a4-4d4c-9fd4-bfaaa9f31cae",
+            "name": "Средний",
+            "position": [
+              0.9659649062935802,
+              1.575,
+              1.3765834472425105
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "2ddbaac7-0cd6-47e5-a6d6-d9ed48c819b5",
+            "name": "Реакция",
+            "position": [
+              -0.8511275937769227,
+              1.512,
+              1.1331411219234642
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 75,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "d330549d-364d-4b0b-93d9-88945c179fd9",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "f501c2e7-a0ce-41c5-9afe-5d10d03ba6f4",
+            "name": "Через плечо",
+            "position": [
+              1.8296239695201904,
+              1.562,
+              -0.088290235793062
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 35,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "934142b8-4da3-419c-a95a-fd9585114be7",
+            "name": "Снизу",
+            "position": [
+              2.686184199300463,
+              0.18,
+              2.581093963579707
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "activeCameraId": "390e46b6-03a4-4d4c-9fd4-bfaaa9f31cae"
+      }
+    },
+    {
+      "id": "bb95d6e3-da4b-48e4-bcdc-ad4ab79b8fba",
+      "name": "Реакция Марии",
+      "duration": 3,
+      "notes": "Пауза. Взгляд в камеру.",
+      "thumbnail": "",
+      "scene": {
+        "objects": [
+          {
+            "id": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "name": "Алексей",
+            "kind": "person",
+            "position": [
+              -1,
+              0,
+              0
+            ],
+            "rotation": 55,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#c89b72",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "d330549d-364d-4b0b-93d9-88945c179fd9",
+            "name": "Мария",
+            "kind": "person",
+            "position": [
+              1.15,
+              0,
+              0.2
+            ],
+            "rotation": -65,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#729b9a",
+            "height": 1.68,
+            "pose": "stand",
+            "arms": "front",
+            "head": 0
+          },
+          {
+            "id": "48ced0a5-8db6-44ed-865e-13a1ff74e262",
+            "name": "Стол",
+            "kind": "table",
+            "position": [
+              0,
+              0,
+              -1
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#b5a58b",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "c8b07c0b-7b9f-49b5-b88f-a534bb27a573",
+            "name": "Стул",
+            "kind": "chair",
+            "position": [
+              0,
+              0,
+              -2
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#879a95",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "f7ffd831-2b78-498d-aa5d-ae61823f60d0",
+            "name": "Стена",
+            "kind": "wall",
+            "position": [
+              0,
+              0,
+              -3
+            ],
+            "rotation": 0,
+            "size": [
+              8,
+              3,
+              0.12
+            ],
+            "color": "#b7c0bd",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          },
+          {
+            "id": "ecb11432-0063-4986-9308-cfbb6f865e08",
+            "name": "Дверь",
+            "kind": "door",
+            "position": [
+              2.6,
+              0,
+              -2.88
+            ],
+            "rotation": 0,
+            "size": [
+              1,
+              1,
+              1
+            ],
+            "color": "#879a95",
+            "height": 1.75,
+            "pose": "stand",
+            "arms": "down",
+            "head": 0
+          }
+        ],
+        "cameras": [
+          {
+            "id": "47311ad8-92ec-4ea4-a8a3-2eb3bb0eff60",
+            "name": "Общий",
+            "position": [
+              1.075,
+              1.8575,
+              6.559282288168918
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "point",
+            "targetId": null,
+            "target": [
+              0.07499999999999996,
+              0.8574999999999999,
+              0.1
+            ]
+          },
+          {
+            "id": "390e46b6-03a4-4d4c-9fd4-bfaaa9f31cae",
+            "name": "Средний",
+            "position": [
+              0.9659649062935802,
+              1.575,
+              1.3765834472425105
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "2ddbaac7-0cd6-47e5-a6d6-d9ed48c819b5",
+            "name": "Реакция",
+            "position": [
+              -0.8511275937769227,
+              1.512,
+              1.1331411219234642
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 75,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "d330549d-364d-4b0b-93d9-88945c179fd9",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "f501c2e7-a0ce-41c5-9afe-5d10d03ba6f4",
+            "name": "Через плечо",
+            "position": [
+              1.8296239695201904,
+              1.562,
+              -0.088290235793062
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 35,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          },
+          {
+            "id": "934142b8-4da3-419c-a95a-fd9585114be7",
+            "name": "Снизу",
+            "position": [
+              2.686184199300463,
+              0.18,
+              2.581093963579707
+            ],
+            "rotation": [
+              0,
+              0,
+              0
+            ],
+            "focal": 40,
+            "format": "16:9",
+            "aim": "person",
+            "targetId": "2799ad01-53ff-4933-ba06-46b2cd498a7d",
+            "target": [
+              0,
+              1,
+              0
+            ]
+          }
+        ],
+        "activeCameraId": "2ddbaac7-0cd6-47e5-a6d6-d9ed48c819b5"
+      }
+    }
+  ],
+  "animation": {
+    "duration": 5,
+    "easing": "smooth",
+    "shake": 0,
+    "keys": []
+  }
+}

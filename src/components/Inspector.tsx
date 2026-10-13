@@ -1,3 +1,4 @@
+import { appearanceLabels } from "../catalog";
 import { useEffect, useState } from "react";
 import { Copy, Trash2, UserRound, Video, Crosshair } from "lucide-react";
 import {
@@ -5,7 +6,7 @@ import {
   type SceneObject,
   type ShotCamera,
   type Vec3,
-  labels,
+  objectLabel,
   targetPoint,
 } from "../model";
 import { cameraRotation } from "../world";
@@ -144,7 +145,7 @@ export function Inspector({
     <>
       <div className="inspector-heading">
         {c ? <Video size={18} /> : <UserRound size={18} />}
-        <span>{c ? "Съёмочная камера" : labels[o!.kind]}</span>
+        <span>{c ? "Съёмочная камера" : objectLabel(o!)}</span>
         <span className="tiny-badge">{c ? "CAM" : "OBJ"}</span>
       </div>
       <label className="field">
@@ -221,8 +222,37 @@ export function Inspector({
             {o.kind === "person" ? (
               <>
                 <label className="field">
+                  Силуэт / аксессуар
+                  <select
+                    aria-label="Внешний вид персонажа"
+                    value={o.appearance ?? "base"}
+                    onChange={(e) =>
+                      patchObject(o.id, {
+                        appearance: e.target.value as SceneObject["appearance"],
+                      })
+                    }
+                  >
+                    {Object.entries(appearanceLabels).map(([value, label]) => (
+                      <option key={value} value={value}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="field">
+                  Короткая метка для раскадровки
+                  <input
+                    aria-label="Метка персонажа"
+                    maxLength={20}
+                    placeholder="Например, А или М1"
+                    value={o.tag ?? ""}
+                    onChange={(e) => patchObject(o.id, { tag: e.target.value })}
+                  />
+                </label>
+                <label className="field">
                   Поза
                   <select
+                    aria-label="Поза персонажа"
                     value={o.pose}
                     onChange={(e) =>
                       patchObject(o.id, {

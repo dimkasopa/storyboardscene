@@ -1,12 +1,14 @@
+import type { EditorVisibility } from "./EditorDisplay";
 import {
   Component,
+  useCallback,
   useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import type { ReactNode } from "react";
+import type { ReactNode, RefObject } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, TransformControls, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -23,6 +25,7 @@ import {
   type ShotCamera,
   type Vec3,
   makeCamera,
+  characterLabel,
   aspect,
 } from "../model";
 export type ViewAPI = {
@@ -39,6 +42,8 @@ type Props = {
   mode: "translate" | "rotate";
   onAPI: (api: ViewAPI) => void;
   disabled?: boolean;
+  visibility: EditorVisibility;
+  portal?: RefObject<HTMLDivElement>;
 };
 class Boundary extends Component<{ children: ReactNode }, { error: boolean }> {
   state = { error: false };
@@ -86,6 +91,8 @@ function Asset({ object }: { object: SceneData["objects"][number] }) {
     () => asset(object),
     [
       object.kind,
+      object.prop,
+      object.appearance,
       object.color,
       object.height,
       object.pose,
@@ -123,15 +130,17 @@ function ObjectView({
       }
     >
       <Asset object={o} />
-      {active && (
-        <Html
-          position={[0, o.kind === "person" ? o.height + 0.22 : 1.4, 0]}
-          center
-          className="object-label"
-        >
-          {o.name}
-        </Html>
-      )}
+      {props &&
+        (o.kind === "person" ? props.visibility.personLabels : active) && (
+          <Html
+            portal={props.portal}
+            position={[0, o.kind === "person" ? o.height + 0.22 : 1.4, 0]}
+            center
+            className="object-label"
+          >
+            {characterLabel(o)}
+          </Html>
+        )}
     </group>
   );
   return (
@@ -195,9 +204,16 @@ function CameraMarker({ c, props }: { c: ShotCamera; props: Props }) {
         <cylinderGeometry args={[0.075, 0.1, 0.16, 8]} />
         <meshStandardMaterial color="#202e35" />
       </mesh>
-      <Html position={[0, 0.24, 0]} center className="camera-label">
-        {c.name}
-      </Html>
+      {props.visibility.cameraLabels && (
+        <Html
+          portal={props.portal}
+          position={[0, 0.24, 0]}
+          center
+          className="camera-label"
+        >
+          {c.name}
+        </Html>
+      )}
     </group>
   );
   return (
@@ -225,7 +241,9 @@ function CameraMarker({ c, props }: { c: ShotCamera; props: Props }) {
           }}
         />
       )}
-      {c.id === props.scene.activeCameraId && <primitive object={helper} />}
+      {props.visibility.frustums && c.id === props.scene.activeCameraId && (
+        <primitive object={helper} />
+      )}
     </>
   );
 }
@@ -269,10 +287,12 @@ function EditorWorld(props: Props) {
   return (
     <>
       <Environment />
-      <gridHelper
-        args={[30, 30, "#929f99", "#b9c2b9"]}
-        position={[0, 0.003, 0]}
-      />
+      {props.visibility.grid && (
+        <gridHelper
+          args={[30, 30, "#929f99", "#b9c2b9"]}
+          position={[0, 0.003, 0]}
+        />
+      )}
       {props.scene.objects.map((o) => (
         <ObjectView key={o.id} o={o} props={props} />
       ))}
@@ -291,17 +311,32 @@ function EditorWorld(props: Props) {
   );
 }
 export function EditorViewport(props: Props) {
+  const portal = useRef<HTMLDivElement>(null!);
+  const [ready, setReady] = useState(false);
+  const attachPortal = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      portal.current = node;
+      setReady(true);
+    }
+  }, []);
+  // Html uses an explicit stable portal rather than the Canvas event target,
+  // which can change during initial mount or rapid project replacement.
   return (
     <Boundary>
       {webgl ? (
-        <Canvas
-          shadows
-          camera={{ position: [7, 5, 8], fov: 45, near: 0.025, far: 200 }}
-          dpr={[1, 1.5]}
-          onPointerMissed={() => props.onSelect(null)}
-        >
-          <EditorWorld {...props} />
-        </Canvas>
+        <div className="editor-viewport">
+          <div className="editor-label-layer" ref={attachPortal} />
+          {ready && (
+            <Canvas
+              shadows
+              camera={{ position: [7, 5, 8], fov: 45, near: 0.025, far: 200 }}
+              dpr={[1, 1.5]}
+              onPointerMissed={() => props.onSelect(null)}
+            >
+              <EditorWorld {...props} portal={portal} />
+            </Canvas>
+          )}
+        </div>
       ) : (
         <div className="webgl-error">
           WebGL 2 недоступен. Включите аппаратное ускорение браузера. Сохранение

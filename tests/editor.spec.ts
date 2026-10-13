@@ -203,7 +203,7 @@ test("PNG export dimensions, content and preview correspondence; ZIP and sheet",
     .click();
   const sheet = await readFile((await (await sheetPromise).path())!);
   expect(sheet.readUInt32BE(16)).toBe(1920);
-  expect(sheet.readUInt32BE(20)).toBe(490);
+  expect(sheet.readUInt32BE(20)).toBe(784);
 });
 
 test("animation keys, scrubbing, playback, fly mode and frame sequence export", async ({
@@ -294,9 +294,9 @@ test("gizmo drag is one undo step; camera from view and storyboard playback", as
   await page
     .getByRole("button", { name: "Повторить · Ctrl Shift Z", exact: true })
     .click();
-  expect(
-    Number(await page.getByLabel("X · м", { exact: true }).inputValue()),
-  ).toBeGreaterThan(-0.8);
+  await expect(page.getByLabel("X · м", { exact: true })).toHaveValue(
+    String(Number(moved.scene.objects[0].position[0].toFixed(3))),
+  );
   await page
     .getByRole("button", { name: "Камера из текущего вида", exact: true })
     .click();

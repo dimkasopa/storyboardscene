@@ -1,3 +1,5 @@
+import { SeedanceGuide } from "./SeedanceGuide";
+import { useDismiss } from "../useDismiss";
 import { useRef, useState } from "react";
 import {
   Aperture,
@@ -13,6 +15,7 @@ import {
   Save,
   Upload,
   Video,
+  X,
 } from "lucide-react";
 import type { SceneData } from "../model";
 import type { useProject } from "../useProject";
@@ -21,6 +24,7 @@ import {
   download,
   exportAnimation,
   exportStoryboard,
+  exportSeedance,
   safeName,
   withRenderer,
 } from "../export";
@@ -58,6 +62,9 @@ export function ProjectHeader({
   const [exportMenu, setExportMenu] = useState(false),
     [fps, setFps] = useState(12);
   const input = useRef<HTMLInputElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+  const [characterLabels, setCharacterLabels] = useState(false);
+  useDismiss(menu, exportMenu, () => setExportMenu(false));
   const [w, h] = dimensions(scene, resolution);
   const json = () => {
     download(
@@ -129,13 +136,25 @@ export function ProjectHeader({
         >
           <Upload size={16} />
         </button>
-        <div className="menu-anchor">
-          <button className="accent" onClick={() => setExportMenu(!exportMenu)}>
+        <div className="menu-anchor export-anchor" ref={menu}>
+          <button
+            className="accent"
+            aria-expanded={exportMenu}
+            onClick={() => setExportMenu(!exportMenu)}
+          >
             <ArrowDownToLine size={16} /> Экспорт <ChevronDown size={13} />
           </button>
           {exportMenu && (
             <div className="dropdown export-dropdown">
-              <h4>Забрать результат</h4>
+              <h4>
+                Забрать результат{" "}
+                <button
+                  aria-label="Закрыть меню экспорта"
+                  onClick={() => setExportMenu(false)}
+                >
+                  <X size={14} />
+                </button>
+              </h4>
               <label className="field">
                 Разрешение PNG
                 <select
@@ -150,6 +169,36 @@ export function ProjectHeader({
               <p className="hint">
                 Текущий формат: {w} × {h} px
               </p>
+              <button
+                className="seedance-export accent"
+                disabled={!project.frames.length}
+                onClick={() =>
+                  run(async () => {
+                    await exportSeedance(project, resolution, setBusy, {
+                      characterLabels,
+                    });
+                    setExportMenu(false);
+                    notify(
+                      "Пакет для Seedance скачан: листы, PNG и текстовый план",
+                    );
+                  })
+                }
+              >
+                <Clapperboard size={16} /> Экспорт для Seedance
+              </button>
+              <p className="hint">
+                ZIP: до 6 кадров на листе, отдельные PNG, shot-list.txt и
+                shot-list.json. Форматы камер сохраняются.
+              </p>
+              <label className="export-labels">
+                <input
+                  type="checkbox"
+                  checked={characterLabels}
+                  onChange={(e) => setCharacterLabels(e.target.checked)}
+                />{" "}
+                Имена и метки в подписях листа
+              </label>
+              <hr />
               <button
                 onClick={async () => {
                   await exportPNG();
@@ -189,12 +238,18 @@ export function ProjectHeader({
               <button
                 onClick={() =>
                   run(() =>
-                    exportStoryboard(project, "sheet", resolution, setBusy),
+                    exportStoryboard(project, "sheet", resolution, setBusy, {
+                      characterLabels,
+                    }),
                   )
                 }
               >
                 <Clapperboard size={16} /> Лист раскадровки · PNG
               </button>
+              <p className="hint">
+                Больше 6 кадров — несколько PNG-листов в ZIP. Изображения внутри
+                ячеек не обрезаются.
+              </p>
               <hr />
               <label className="field">
                 Частота анимации
@@ -222,6 +277,7 @@ export function ProjectHeader({
               <button onClick={json}>
                 <ArrowDownToLine size={16} /> Проект · JSON (резервная копия)
               </button>
+              <SeedanceGuide />
             </div>
           )}
         </div>

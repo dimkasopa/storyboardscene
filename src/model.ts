@@ -1,3 +1,10 @@
+import {
+  appearances,
+  propKinds,
+  propLabels,
+  propBaseKinds,
+  type PropKind,
+} from "./catalog";
 import { z } from "zod";
 import { Euler, Quaternion, MathUtils } from "three";
 const n = z.number().finite().min(-10000).max(10000);
@@ -19,6 +26,9 @@ export const objectSchema = z.object({
   pose: z.enum(["stand", "sit"]),
   arms: z.enum(["down", "raised", "front"]),
   head: z.number().min(-85).max(85),
+  appearance: z.enum(appearances).optional(),
+  tag: z.string().max(20).optional(),
+  prop: z.enum(propKinds).optional(),
 });
 export const cameraSchema = z.object({
   id,
@@ -47,11 +57,43 @@ export const sceneSchema = z
     if (!s.cameras.some((c) => c.id === s.activeCameraId))
       ctx.addIssue({ code: "custom", message: "Не найдена активная камера" });
   });
+export const emptyFrameInfo = {
+  shotType: "" as const,
+  speakerId: null,
+  action: "",
+  cameraMovement: "",
+  transition: "" as const,
+  transitionNotes: "",
+};
+export const shotTypeLabels = {
+  "": "Не задан",
+  wide: "Общий",
+  two: "На двоих",
+  medium: "Средний",
+  close: "Крупный",
+  shoulder: "Через плечо",
+  detail: "Деталь",
+  other: "Другой",
+} as const;
+export const transitionLabels = {
+  "": "Не задан",
+  cut: "Склейка",
+  fade: "Плавное затемнение",
+  other: "Другое",
+} as const;
 const frameSchema = z.object({
   id,
   name,
   duration: z.number().min(0.1).max(300),
   notes: z.string().max(4000),
+  shotType: z
+    .enum(["", "wide", "two", "medium", "close", "shoulder", "detail", "other"])
+    .optional(),
+  speakerId: id.nullable().optional(),
+  action: z.string().max(4000).optional(),
+  cameraMovement: z.string().max(1000).optional(),
+  transition: z.enum(["", "cut", "fade", "other"]).optional(),
+  transitionNotes: z.string().max(1000).optional(),
   scene: sceneSchema,
   thumbnail: z
     .string()
@@ -101,6 +143,7 @@ export const projectSchema = z
       });
   });
 export type SceneObject = z.infer<typeof objectSchema>;
+export type AddObjectKind = SceneObject["kind"] | PropKind;
 export type ShotCamera = z.infer<typeof cameraSchema>;
 export type SceneData = z.infer<typeof sceneSchema>;
 export type Frame = z.infer<typeof frameSchema>;
@@ -119,11 +162,27 @@ export const labels: Record<SceneObject["kind"], string> = {
 };
 export const aspect = (format: ShotCamera["format"]) =>
   format === "16:9" ? 16 / 9 : format === "9:16" ? 9 / 16 : 1;
-export function makeObject(kind: SceneObject["kind"]): SceneObject {
+export function objectLabel(o: SceneObject) {
+  return o.prop ? propLabels[o.prop] : labels[o.kind];
+}
+export function characterLabel(o: SceneObject) {
+  return o.tag ? `${o.tag} · ${o.name}` : o.name;
+}
+export function makeObject(kind: AddObjectKind): SceneObject {
+  if (propKinds.includes(kind as PropKind)) {
+    const prop = kind as PropKind;
+    return {
+      ...makeObject(propBaseKinds[prop]),
+      prop,
+      name: propLabels[prop],
+      size: [1, 1, 1],
+    };
+  }
+  const baseKind = kind as SceneObject["kind"];
   return {
     id: uid(),
-    name: labels[kind],
-    kind,
+    name: labels[baseKind],
+    kind: baseKind,
     position: [0, 0, 0],
     rotation: 0,
     size:
@@ -138,6 +197,8 @@ export function makeObject(kind: SceneObject["kind"]): SceneObject {
     pose: "stand",
     arms: "down",
     head: 0,
+    appearance: "base",
+    tag: "",
   };
 }
 export function makeCamera(): ShotCamera {
@@ -375,20 +436,19 @@ export function demoProject(): Project {
     name: "Разговор в офисе",
     updatedAt: Date.now(),
     scene,
-    frames: scene.cameras
-      .slice(0, 3)
-      .map((c, i) => ({
-        id: uid(),
-        name: ["Начало разговора", "Важный вопрос", "Реакция Марии"][i],
-        duration: 3,
-        notes: [
-          "Обычный рабочий день.",
-          "«А кто согласовал этот план?»",
-          "Пауза. Взгляд в камеру.",
-        ][i],
-        thumbnail: "",
-        scene: { ...clone(scene), activeCameraId: c.id },
-      })),
+    frames: scene.cameras.slice(0, 3).map((c, i) => ({
+      id: uid(),
+      name: ["Начало разговора", "Важный вопрос", "Реакция Марии"][i],
+      ...emptyFrameInfo,
+      duration: 3,
+      notes: [
+        "Обычный рабочий день.",
+        "«А кто согласовал этот план?»",
+        "Пауза. Взгляд в камеру.",
+      ][i],
+      thumbnail: "",
+      scene: { ...clone(scene), activeCameraId: c.id },
+    })),
     animation: { duration: 5, easing: "smooth", shake: 0, keys: [] },
   };
 }
@@ -399,5 +459,22 @@ export function parseProject(text: string): Project {
     throw new Error(
       "Некорректный проект v1: " + result.error.issues[0].message,
     );
-  return result.data;
+  // Add only safe optional defaults, including nested snapshots and animation keys.
+  const p = result.data;
+  for (const scene of [
+    p.scene,
+    ...p.frames.map((f) => f.scene),
+    ...p.animation.keys.map((k) => k.scene),
+  ]) {
+    scene.objects.forEach((o) => {
+      o.appearance ??= "base";
+      o.tag ??= "";
+    });
+  }
+  p.frames.forEach((f) => {
+    for (const [key, value] of Object.entries(emptyFrameInfo))
+      if (f[key as keyof typeof emptyFrameInfo] === undefined)
+        Object.assign(f, { [key]: value });
+  });
+  return p;
 }

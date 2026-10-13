@@ -1,3 +1,15 @@
+import {
+  SHEET,
+  fitImage,
+  timedShots,
+  sheetPages,
+  shotListData,
+  shotListText,
+  seedanceHelp,
+  seconds,
+  type TimedShot,
+} from "./storyboard";
+import { characterLabel, shotTypeLabels } from "./model";
 import * as THREE from "three";
 import { zipSync, strToU8 } from "fflate";
 import {
@@ -68,10 +80,17 @@ export class ImageRenderer {
     try {
       await this.renderer.compileAsync(scene, camera);
       this.renderer.render(scene, camera);
+      if (this.renderer.getContext().isContextLost())
+        throw new Error(
+          "3D-контекст потерян. Перезагрузите страницу и повторите экспорт.",
+        );
       const out = document.createElement("canvas");
       out.width = w;
       out.height = h;
-      out.getContext("2d")!.drawImage(this.renderer.domElement, 0, 0);
+      const context = out.getContext("2d");
+      if (!context)
+        throw new Error("Недостаточно памяти для PNG. Уменьшите разрешение.");
+      context.drawImage(this.renderer.domElement, 0, 0);
       return out;
     } finally {
       disposeTree(scene);
@@ -92,88 +111,264 @@ export class ImageRenderer {
   }
 }
 export async function withRenderer<T>(fn: (r: ImageRenderer) => Promise<T>) {
-  const r = new ImageRenderer();
+  let r: ImageRenderer;
+  try {
+    r = new ImageRenderer();
+  } catch {
+    throw new Error(
+      "Не удалось подготовить 3D-экспорт. Проверьте WebGL и аппаратное ускорение браузера.",
+    );
+  }
   try {
     return await fn(r);
   } finally {
     r.dispose();
   }
 }
+export type SheetOptions = { characterLabels?: boolean };
+export async function pngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) =>
+    canvas.toBlob(
+      (blob) =>
+        blob
+          ? resolve(blob)
+          : reject(
+              new Error(
+                "Не удалось создать PNG. Уменьшите разрешение и повторите экспорт.",
+              ),
+            ),
+      "image/png",
+    ),
+  );
+}
+function shortLine(ctx: CanvasRenderingContext2D, text: string, width: number) {
+  if (ctx.measureText(text).width <= width) return text;
+  while (text && ctx.measureText(text + "…").width > width)
+    text = text.slice(0, -1);
+  return text + "…";
+}
+function wrapCaption(
+  ctx: CanvasRenderingContext2D,
+  text: string,
+  width: number,
+  maxLines: number,
+) {
+  // Fixed font sizes; never horizontally scale long text into unreadable glyphs.
+  const lines: string[] = [];
+  let line = "";
+  for (const char of text.replace(/\s+/g, " ").trim()) {
+    if (ctx.measureText(line + char).width > width) {
+      lines.push(line.trimEnd());
+      line = "";
+    }
+    line += char;
+  }
+  if (line) lines.push(line.trim());
+  const result = lines.slice(0, maxLines);
+  if (lines.length > maxLines)
+    result[maxLines - 1] = shortLine(ctx, result[maxLines - 1] + "…", width);
+  return result;
+}
+function newSheet(
+  project: Project,
+  page: ReturnType<typeof sheetPages>[number],
+  pageCount: number,
+) {
+  const canvas = document.createElement("canvas");
+  canvas.width = page.width;
+  canvas.height = page.height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Недостаточно памяти для листа раскадровки.");
+  ctx.fillStyle = "#f1f0e9";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = "#24313a";
+  ctx.font = "bold 30px sans-serif";
+  ctx.fillText(shortLine(ctx, project.name, canvas.width - 440), 24, 41);
+  ctx.font = "22px sans-serif";
+  ctx.fillText("Порядок чтения: слева направо, сверху вниз", 24, 75);
+  ctx.textAlign = "right";
+  ctx.fillText(
+    `Лист ${String(page.number).padStart(2, "0")} / ${pageCount}`,
+    canvas.width - 24,
+    41,
+  );
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#65706e";
+  ctx.font = "18px sans-serif";
+  ctx.fillText(
+    "Director Studio · отдельные PNG и полный текстовый план сохраняют детали каждого кадра",
+    24,
+    canvas.height - 18,
+  );
+  return canvas;
+}
+function drawSheetCard(
+  sheet: HTMLCanvasElement,
+  image: HTMLCanvasElement,
+  shot: TimedShot,
+  index: number,
+  options: SheetOptions,
+) {
+  const ctx = sheet.getContext("2d")!,
+    x = (index % SHEET.columns) * SHEET.cellWidth,
+    y = SHEET.header + Math.floor(index / SHEET.columns) * SHEET.cellHeight;
+  ctx.fillStyle = "#fafaf5";
+  ctx.fillRect(x + 12, y + 6, SHEET.cellWidth - 24, SHEET.cellHeight - 16);
+  ctx.strokeStyle = "#d2d6ce";
+  ctx.strokeRect(x + 12, y + 6, SHEET.cellWidth - 24, SHEET.cellHeight - 16);
+  ctx.fillStyle = "#25353b";
+  ctx.font = "bold 28px sans-serif";
+  ctx.fillText(
+    `${shot.formattedNumber} · ${seconds(shot.start)}–${seconds(shot.end)} с`,
+    x + 24,
+    y + 39,
+  );
+  ctx.font = "bold 20px sans-serif";
+  ctx.textAlign = "right";
+  ctx.fillText(shot.format, x + SHEET.cellWidth - 24, y + 38);
+  ctx.textAlign = "left";
+  const box = { ...SHEET.image, x: x + SHEET.image.x, y: y + SHEET.image.y };
+  ctx.fillStyle = "#d7dad4";
+  ctx.fillRect(box.x, box.y, box.width, box.height);
+  const fit = fitImage(image.width, image.height, box);
+  ctx.drawImage(image, fit.x, fit.y, fit.width, fit.height);
+  ctx.fillStyle = "#24313a";
+  ctx.font = "bold 24px sans-serif";
+  ctx.fillText(
+    shortLine(
+      ctx,
+      [
+        shot.frame.shotType ? shotTypeLabels[shot.frame.shotType] : "",
+        shot.frame.name,
+      ]
+        .filter(Boolean)
+        .join(" · ") || "Название не задано",
+      SHEET.image.width,
+    ),
+    x + 24,
+    y + 497,
+  );
+  ctx.font = "22px sans-serif";
+  ctx.fillStyle = "#485955";
+  const caption = [shot.frame.action, shot.frame.notes]
+    .filter(Boolean)
+    .join(" · ");
+  wrapCaption(ctx, caption, SHEET.image.width, 2).forEach((line, i) =>
+    ctx.fillText(line, x + 24, y + 533 + i * 28),
+  );
+  if (options.characterLabels) {
+    ctx.font = "20px sans-serif";
+    ctx.fillStyle = "#586862";
+    const people = shot.frame.scene.objects
+      .filter((o) => o.kind === "person")
+      .map(characterLabel)
+      .join("; ");
+    if (people)
+      ctx.fillText(
+        shortLine(ctx, "В сцене: " + people, SHEET.image.width),
+        x + 24,
+        y + 604,
+      );
+  }
+}
+async function storyboardFiles(
+  project: Project,
+  mode: "zip" | "sheet" | "seedance",
+  longEdge: number,
+  progress: (s: string) => void,
+  options: SheetOptions,
+) {
+  if (!project.frames.length) throw new Error("Добавьте кадры в раскадровку");
+  const files: Record<string, Uint8Array> = {},
+    shots = timedShots(project),
+    pages = sheetPages(shots);
+  await withRenderer(async (r) => {
+    for (const page of pages) {
+      const sheet =
+        mode === "zip" ? null : newSheet(project, page, pages.length);
+      for (const [index, shot] of page.shots.entries()) {
+        progress(
+          `Кадр ${shot.number} из ${shots.length} · лист ${page.number} / ${pages.length}`,
+        );
+        const image = await r.canvas(
+          shot.frame.scene,
+          mode === "sheet" ? 800 : longEdge,
+        );
+        if (mode !== "sheet") {
+          const name =
+            mode === "seedance"
+              ? shot.filename
+              : `${shot.formattedNumber}-${safeName(shot.frame.name)}.png`;
+          files[name] = new Uint8Array(
+            await (await pngBlob(image)).arrayBuffer(),
+          );
+        }
+        if (sheet) drawSheetCard(sheet, image, shot, index, options);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
+      if (sheet)
+        files[`storyboard-${String(page.number).padStart(2, "0")}.png`] =
+          new Uint8Array(await (await pngBlob(sheet)).arrayBuffer());
+    }
+  });
+  return files;
+}
 export async function exportStoryboard(
-  p: Project,
+  project: Project,
   kind: "zip" | "sheet",
   longEdge: number,
   progress: (s: string) => void,
+  options: SheetOptions = {},
 ) {
-  if (!p.frames.length) throw new Error("Добавьте кадры в раскадровку");
-  await withRenderer(async (r) => {
-    const files: Record<string, Uint8Array> = {};
-    const cols = 3,
-      cellW = 640,
-      cellH = 490;
-    const sheet = document.createElement("canvas");
-    // Keep the contact sheet below conservative browser canvas limits.
-    const columns = p.frames.length > 60 ? 5 : cols;
-    sheet.width = columns * cellW;
-    sheet.height = Math.ceil(p.frames.length / columns) * cellH;
-    const ctx = sheet.getContext("2d")!;
-    ctx.fillStyle = "#f3f1e9";
-    ctx.fillRect(0, 0, sheet.width, sheet.height);
-    for (let i = 0; i < p.frames.length; i++) {
-      const f = p.frames[i];
-      progress(`Кадр ${i + 1} из ${p.frames.length}`);
-      const canvas = await r.canvas(f.scene, kind === "sheet" ? 800 : longEdge);
-      if (kind === "zip") {
-        const blob = await new Promise<Blob>((res, rej) =>
-          canvas.toBlob((b) => (b ? res(b) : rej(new Error("PNG недоступен")))),
-        );
-        files[`${String(i + 1).padStart(2, "0")}-${safeName(f.name)}.png`] =
-          new Uint8Array(await blob.arrayBuffer());
-      } else {
-        const x = (i % columns) * cellW,
-          y = Math.floor(i / columns) * cellH,
-          s = Math.min((cellW - 32) / canvas.width, 340 / canvas.height);
-        ctx.drawImage(
-          canvas,
-          x + (cellW - canvas.width * s) / 2,
-          y + 16,
-          canvas.width * s,
-          canvas.height * s,
-        );
-        ctx.fillStyle = "#17232a";
-        ctx.font = "bold 21px sans-serif";
-        ctx.fillText(`${i + 1}. ${f.name}`, x + 16, y + 385, cellW - 32);
-        ctx.font = "18px sans-serif";
-        const text = `${f.duration} с · ${f.notes}`;
-        let line = "",
-          lineY = y + 416;
-        for (const word of text.split(/\s+/)) {
-          if (ctx.measureText(line + word).width > cellW - 32) {
-            ctx.fillText(line, x + 16, lineY);
-            lineY += 24;
-            line = "";
-            if (lineY > y + 470) break;
-          }
-          line += word + " ";
-        }
-        if (lineY <= y + 470) ctx.fillText(line, x + 16, lineY, cellW - 32);
-      }
-      await new Promise((res) => setTimeout(res, 0));
-    }
-    if (kind === "zip")
-      download(
-        new Blob([zipSync(files, { level: 0 }) as BlobPart]),
-        safeName(p.name) + "-раскадровка.zip",
-      );
-    else {
-      const blob = await new Promise<Blob>((res, rej) =>
-        sheet.toBlob((b) =>
-          b ? res(b) : rej(new Error("Лист слишком велик")),
-        ),
-      );
-      download(blob, safeName(p.name) + "-лист.png");
-    }
-  });
+  const files = await storyboardFiles(
+    project,
+    kind,
+    longEdge,
+    progress,
+    options,
+  );
+  if (kind === "sheet" && Object.keys(files).length === 1)
+    download(
+      new Blob([Object.values(files)[0] as BlobPart], { type: "image/png" }),
+      safeName(project.name) + "-лист.png",
+    );
+  else
+    download(
+      new Blob([zipSync(files, { level: 0 }) as BlobPart], {
+        type: "application/zip",
+      }),
+      safeName(project.name) +
+        (kind === "sheet" ? "-листы.zip" : "-раскадровка.zip"),
+    );
+}
+export async function exportSeedance(
+  project: Project,
+  longEdge: number,
+  progress: (s: string) => void,
+  options: SheetOptions = {},
+) {
+  const files = await storyboardFiles(
+    project,
+    "seedance",
+    longEdge,
+    progress,
+    options,
+  );
+  files["shot-list.txt"] = strToU8(shotListText(project));
+  files["shot-list.json"] = strToU8(
+    JSON.stringify(shotListData(project), null, 2),
+  );
+  files["README.txt"] = strToU8(
+    seedanceHelp +
+      "\nОдин лист содержит до 6 кадров. Листы нумеруются в общем порядке; нумерация кадров между страницами продолжается.\nshot-list.json содержит полный проект v1 в поле project и структурированный план. Для резервной копии, которую можно импортировать напрямую, используйте обычный экспорт «Проект · JSON».\n",
+  );
+  progress("Собираю ZIP для Seedance…");
+  download(
+    new Blob([zipSync(files, { level: 0 }) as BlobPart], {
+      type: "application/zip",
+    }),
+    safeName(project.name) + "-Seedance.zip",
+  );
 }
 export async function exportAnimation(
   p: Project,

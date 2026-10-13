@@ -1,3 +1,4 @@
+import { SeedanceGuide } from "./SeedanceGuide";
 import { Trash2, X } from "lucide-react";
 import type { Project } from "../model";
 type Props = {
@@ -78,6 +79,7 @@ export function ProjectDialogs({
               </>
             ) : (
               <div className="help-content">
+                <SeedanceGuide />
                 <p>
                   Director Studio помогает найти композицию и собрать визуальный
                   референс. Все сцены и файлы остаются на вашем устройстве.

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   ChevronDown,
@@ -7,14 +7,16 @@ import {
   UserRound,
   Video,
 } from "lucide-react";
-import { labels, type SceneData, type SceneObject } from "../model";
+import { characterLabel, type SceneData, type AddObjectKind } from "../model";
+import { objectCategories } from "../catalog";
+import { useDismiss } from "../useDismiss";
 type Props = {
   scene: SceneData;
   selected: string | null;
   disabled: boolean;
   onClose: () => void;
   select: (id: string | null) => void;
-  addObject: (kind: SceneObject["kind"]) => void;
+  addObject: (kind: AddObjectKind) => void;
   addCamera: (fromView?: boolean) => void;
 };
 export function SceneList({
@@ -27,6 +29,8 @@ export function SceneList({
   addCamera,
 }: Props) {
   const [addMenu, setAddMenu] = useState(false);
+  const menu = useRef<HTMLDivElement>(null);
+  useDismiss(menu, addMenu, () => setAddMenu(false));
   const people = scene.objects.filter((o) => o.kind === "person");
   return (
     <aside className={`scene-list ${disabled ? "locked" : ""}`}>
@@ -36,27 +40,32 @@ export function SceneList({
           <ChevronLeft size={14} />
         </button>
       </div>
-      <div className="menu-anchor add-object">
+      <div className="menu-anchor add-object" ref={menu}>
         <button className="wide" onClick={() => setAddMenu(!addMenu)}>
           <Plus size={15} /> Добавить объект <ChevronDown size={13} />
         </button>
         {addMenu && (
           <div className="dropdown">
-            {Object.entries(labels).map(([kind, name]) => (
-              <button
-                key={kind}
-                onClick={() => {
-                  addObject(kind as SceneObject["kind"]);
-                  setAddMenu(false);
-                }}
-              >
-                {kind === "person" ? (
-                  <UserRound size={15} />
-                ) : (
-                  <Box size={15} />
-                )}{" "}
-                {name}
-              </button>
+            {objectCategories.map((category) => (
+              <section key={category.name} className="object-category">
+                <h4>{category.name}</h4>
+                {category.items.map((item) => (
+                  <button
+                    key={item.kind}
+                    onClick={() => {
+                      addObject(item.kind);
+                      setAddMenu(false);
+                    }}
+                  >
+                    {item.kind === "person" ? (
+                      <UserRound size={15} />
+                    ) : (
+                      <Box size={15} />
+                    )}{" "}
+                    {item.name}
+                  </button>
+                ))}
+              </section>
             ))}
           </div>
         )}
@@ -74,7 +83,7 @@ export function SceneList({
               onClick={() => select(o.id)}
             >
               <UserRound size={15} />
-              <span>{o.name}</span>
+              <span>{characterLabel(o)}</span>
               <i style={{ background: o.color }} />
             </button>
           ))}

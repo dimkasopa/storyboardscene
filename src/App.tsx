@@ -1,3 +1,4 @@
+import { EditorDisplay, defaultVisibility } from "./components/EditorDisplay";
 import { CameraPanel } from "./components/CameraPanel";
 import { ProjectHeader } from "./components/ProjectHeader";
 import { SceneList } from "./components/SceneList";
@@ -5,6 +6,7 @@ import { ProjectDialogs } from "./components/ProjectDialogs";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Aperture,
+  AlertTriangle,
   Box,
   Check,
   ChevronRight,
@@ -24,6 +26,8 @@ import {
 } from "lucide-react";
 import {
   clone,
+  emptyFrameInfo,
+  type AddObjectKind,
   demoProject,
   makeCamera,
   makeObject,
@@ -66,6 +70,8 @@ export default function App() {
     [projects, setProjects] = useState<Project[]>([]),
     [busy, setBusy] = useState(""),
     [message, setMessage] = useState("");
+  const [visibility, setVisibility] = useState(defaultVisibility);
+  const [messageKind, setMessageKind] = useState<"info" | "error">("info");
   const [resolution, setResolution] = useState(1920);
   const api = useRef<ViewAPI | null>(null),
     hydrating = useRef(new Set<string>()),
@@ -88,7 +94,13 @@ export default function App() {
     setFly(false);
     store.end();
   }, [store.end]);
-  const notify = useCallback((text: string) => setMessage(text), []);
+  const notify = useCallback(
+    (text: string, kind: "info" | "error" = "info") => {
+      setMessageKind(kind);
+      setMessage(text);
+    },
+    [],
+  );
   useEffect(() => {
     if (!message) return;
     const t = setTimeout(() => setMessage(""), 6500);
@@ -139,7 +151,7 @@ export default function App() {
       try {
         await fn();
       } catch (e) {
-        notify(e instanceof Error ? e.message : "Операция не удалась");
+        notify(e instanceof Error ? e.message : "Операция не удалась", "error");
       } finally {
         operation.current = false;
         setBusy("");
@@ -290,13 +302,13 @@ export default function App() {
     setFly(true);
     setSelected(project.scene.activeCameraId);
   };
-  const addObject = (kind: SceneObject["kind"]) => {
+  const addObject = (kind: AddObjectKind) => {
     if (project.scene.objects.length >= 200) {
       notify("Лимит: 200 объектов");
       return;
     }
     const o = makeObject(kind);
-    o.name += ` ${project.scene.objects.filter((x) => x.kind === kind).length + 1}`;
+    o.name += ` ${project.scene.objects.filter((x) => x.kind === o.kind && x.prop === o.prop).length + 1}`;
     commit((d) => {
       d.scene.objects.push(o);
     });
@@ -348,6 +360,7 @@ export default function App() {
       if (project.frames.length >= 100) throw new Error("Лимит: 100 кадров");
       const snapshot = clone(scene);
       const frame: Frame = {
+        ...emptyFrameInfo,
         id: uid(),
         name: `Кадр ${project.frames.length + 1}`,
         duration: 3,
@@ -568,6 +581,7 @@ export default function App() {
                     mode={mode}
                     onAPI={onAPI}
                     disabled={disabled}
+                    visibility={visibility}
                   />
                   <div className="view-toolbar">
                     <button
@@ -587,6 +601,7 @@ export default function App() {
                       </button>
                     ))}
                   </div>
+                  <EditorDisplay value={visibility} onChange={setVisibility} />
                   <div className="transform-toolbar">
                     <button
                       className={mode === "translate" ? "active" : ""}
@@ -775,8 +790,15 @@ export default function App() {
         </span>
       </footer>
       {message && (
-        <div className="toast" role="status">
-          <Check size={17} />
+        <div
+          className={`toast ${messageKind === "error" ? "toast-error" : ""}`}
+          role="status"
+        >
+          {messageKind === "error" ? (
+            <AlertTriangle size={17} />
+          ) : (
+            <Check size={17} />
+          )}
           <span>{message}</span>
           <button
             aria-label="Закрыть уведомление"

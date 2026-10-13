@@ -1,3 +1,5 @@
+import { FrameInfo } from "./FrameInfo";
+import { timedShots, formatClock } from "../storyboard";
 import {
   Play,
   Pause,
@@ -63,6 +65,7 @@ export function Timeline({
   deleteKey: (id: string) => void;
   patchAnimation: (p: Partial<Project["animation"]>) => void;
 }) {
+  const timings = timedShots(project);
   const f = project.frames.find((f) => f.id === selectedFrame);
   return (
     <div className="timeline">
@@ -132,6 +135,10 @@ export function Timeline({
                   <span className="frame-duration">{frame.duration} с</span>
                 </div>
                 <span className="frame-title">{frame.name}</span>
+                <span className="frame-timecode">
+                  {formatClock(timings[i].start)}–{formatClock(timings[i].end)}{" "}
+                  · {timings[i].format}
+                </span>
               </button>
             ))}
             <button className="add-frame" onClick={addFrame}>
@@ -140,60 +147,63 @@ export function Timeline({
             </button>
           </div>
           {f && (
-            <div className="frame-editor">
-              <input
-                aria-label="Название кадра"
-                value={f.name}
-                maxLength={200}
-                onChange={(e) => patchFrame(f.id, { name: e.target.value })}
-              />
-              <input
-                aria-label="Описание кадра"
-                placeholder="Реплика или действие…"
-                value={f.notes}
-                maxLength={4000}
-                onChange={(e) => patchFrame(f.id, { notes: e.target.value })}
-              />
-              <NumberField
-                label="Секунды"
-                value={f.duration}
-                min={0.1}
-                max={300}
-                onChange={(duration) => patchFrame(f.id, { duration })}
-              />
-              <button
-                title="Обновить кадр текущей сценой"
-                aria-label="Обновить кадр текущей сценой"
-                onClick={updateFrame}
-              >
-                <RefreshCw size={14} />
-              </button>
-              <button
-                title="Копия кадра"
-                aria-label="Копия кадра"
-                onClick={() => duplicateFrame(f.id)}
-              >
-                <Copy size={14} />
-              </button>
-              <button
-                aria-label="Кадр раньше"
-                onClick={() => moveFrame(f.id, -1)}
-              >
-                <ArrowLeft size={14} />
-              </button>
-              <button
-                aria-label="Кадр позже"
-                onClick={() => moveFrame(f.id, 1)}
-              >
-                <ArrowRight size={14} />
-              </button>
-              <button
-                aria-label="Удалить кадр"
-                onClick={() => deleteFrame(f.id)}
-              >
-                <Trash2 size={14} />
-              </button>
-            </div>
+            <>
+              <div className="frame-editor">
+                <input
+                  aria-label="Название кадра"
+                  value={f.name}
+                  maxLength={200}
+                  onChange={(e) => patchFrame(f.id, { name: e.target.value })}
+                />
+                <input
+                  aria-label="Описание кадра"
+                  placeholder="Реплика или заметка…"
+                  value={f.notes}
+                  maxLength={4000}
+                  onChange={(e) => patchFrame(f.id, { notes: e.target.value })}
+                />
+                <NumberField
+                  label="Секунды"
+                  value={f.duration}
+                  min={0.1}
+                  max={300}
+                  onChange={(duration) => patchFrame(f.id, { duration })}
+                />
+                <button
+                  title="Обновить кадр текущей сценой"
+                  aria-label="Обновить кадр текущей сценой"
+                  onClick={updateFrame}
+                >
+                  <RefreshCw size={14} />
+                </button>
+                <button
+                  title="Копия кадра"
+                  aria-label="Копия кадра"
+                  onClick={() => duplicateFrame(f.id)}
+                >
+                  <Copy size={14} />
+                </button>
+                <button
+                  aria-label="Кадр раньше"
+                  onClick={() => moveFrame(f.id, -1)}
+                >
+                  <ArrowLeft size={14} />
+                </button>
+                <button
+                  aria-label="Кадр позже"
+                  onClick={() => moveFrame(f.id, 1)}
+                >
+                  <ArrowRight size={14} />
+                </button>
+                <button
+                  aria-label="Удалить кадр"
+                  onClick={() => deleteFrame(f.id)}
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              <FrameInfo key={f.id} frame={f} patch={patchFrame} />
+            </>
           )}
         </>
       ) : (
